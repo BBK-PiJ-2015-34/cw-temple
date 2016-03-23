@@ -2,6 +2,9 @@ package student;
 
 import game.EscapeState;
 import game.ExplorationState;
+import game.NodeStatus;
+
+import java.util.Collection;
 
 public class Explorer {
 
@@ -37,7 +40,31 @@ public class Explorer {
      */
     public void explore(ExplorationState state) {
         //TODO:
-        //Testing
+        int disToOrb = state.getDistanceToTarget();
+        long closestNeighbour = (long)100.00;
+        do {
+            Collection<NodeStatus> ns = state.getNeighbours();
+            
+            //ArrayList<Long> neighbourIds = new ArrayList<>();
+//            ns.forEach(ne -> {
+//                if(ne.getDistanceToTarget() < disToOrb){
+//                    disToOrb = ne.getDistanceToTarget();
+//                    closestNeighbour = ne.getId();
+//                }
+//            });
+
+            state.moveTo(closestNeighbour);
+
+        } while (state.getDistanceToTarget() !=0);
+
+        System.out.println(state.getCurrentLocation());
+
+
+
+        System.out.println(state.getCurrentLocation());
+        //ns.forEach(ne -> System.out.println(ne.getId()));
+
+        //System.out.println(state.getNeighbours());
     }
 
     /**
