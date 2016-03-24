@@ -40,11 +40,21 @@ public class Explorer {
      */
     public void explore(ExplorationState state) {
         //TODO:
-        int disToOrb = state.getDistanceToTarget();
-        long closestNeighbour = (long)100.00;
+
+        long closestNeighbour = (long)0;
         do {
+            int disToOrb = state.getDistanceToTarget();
             Collection<NodeStatus> ns = state.getNeighbours();
-            
+            for (NodeStatus ne : ns ){
+                if(ne.getDistanceToTarget() < disToOrb){
+                    disToOrb = ne.getDistanceToTarget();
+                    closestNeighbour = ne.getId();
+                } else {
+//                    disToOrb = ne.getDistanceToTarget();
+                    closestNeighbour = ne.getId();
+                    break;
+                }
+            }
             //ArrayList<Long> neighbourIds = new ArrayList<>();
 //            ns.forEach(ne -> {
 //                if(ne.getDistanceToTarget() < disToOrb){
@@ -52,8 +62,14 @@ public class Explorer {
 //                    closestNeighbour = ne.getId();
 //                }
 //            });
-
             state.moveTo(closestNeighbour);
+//            try {
+//                System.out.println("Move to: "+closestNeighbour);
+//                state.moveTo(closestNeighbour);
+//            } catch (IllegalArgumentException e){
+//                System.err.println("Caught IllegalArgumentException: " + e.getMessage());
+//            }
+
 
         } while (state.getDistanceToTarget() !=0);
 
