@@ -41,18 +41,30 @@ public class Explorer {
     public void explore(ExplorationState state) {
         //TODO:
 
-        long closestNeighbour = (long)0;
+        long prevLocation = (long)0;
         do {
+            long closestNeighbour = (long)0;
+            long lastNeighbour = (long)0;
             int disToOrb = state.getDistanceToTarget();
             Collection<NodeStatus> ns = state.getNeighbours();
             for (NodeStatus ne : ns ){
                 if(ne.getDistanceToTarget() < disToOrb){
-                    disToOrb = ne.getDistanceToTarget();
-                    closestNeighbour = ne.getId();
+                    if (ne.getId() != prevLocation) {
+                        disToOrb = ne.getDistanceToTarget();
+                        closestNeighbour = ne.getId();
+                    }
+
                 } else {
+                    if (ne.getId() != prevLocation) {
+                        if(lastNeighbour == (long)0){
+                            lastNeighbour = ne.getId();
+                        }
+
+                    }
+
 //                    disToOrb = ne.getDistanceToTarget();
-                    closestNeighbour = ne.getId();
-                    break;
+                    //closestNeighbour = ne.getId();
+                    //break;
                 }
             }
             //ArrayList<Long> neighbourIds = new ArrayList<>();
@@ -62,6 +74,10 @@ public class Explorer {
 //                    closestNeighbour = ne.getId();
 //                }
 //            });
+            prevLocation = state.getCurrentLocation();
+            if(closestNeighbour == (long)0){
+                closestNeighbour = lastNeighbour;
+            }
             state.moveTo(closestNeighbour);
 //            try {
 //                System.out.println("Move to: "+closestNeighbour);
