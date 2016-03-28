@@ -3,8 +3,10 @@ package student;
 import game.EscapeState;
 import game.ExplorationState;
 import game.NodeStatus;
+import game.TraversedNodeStatus;
 
-import java.util.Collection;
+import java.util.*;
+import java.util.function.BooleanSupplier;
 
 public class Explorer {
 
@@ -38,53 +40,16 @@ public class Explorer {
      *
      * @param state the information available at the current state
      */
+
+    Queue<TraversedNodeStatus> breathFirstQueue;
+    Stack<Long> breadcrumbs;
+    Set<Long> visitedIds;
+
     public void explore(ExplorationState state) {
         //TODO:
-
-        long prevLocation = (long)0;
+        visitedIds = new HashSet<>();
         do {
-            long closestNeighbour = (long)0;
-            long lastNeighbour = (long)0;
-            int disToOrb = state.getDistanceToTarget();
-            Collection<NodeStatus> ns = state.getNeighbours();
-            for (NodeStatus ne : ns ){
-                if(ne.getDistanceToTarget() < disToOrb){
-                    if (ne.getId() != prevLocation) {
-                        disToOrb = ne.getDistanceToTarget();
-                        closestNeighbour = ne.getId();
-                    }
-
-                } else {
-                    if (ne.getId() != prevLocation) {
-                        if(lastNeighbour == (long)0){
-                            lastNeighbour = ne.getId();
-                        }
-
-                    }
-
-//                    disToOrb = ne.getDistanceToTarget();
-                    //closestNeighbour = ne.getId();
-                    //break;
-                }
-            }
-            //ArrayList<Long> neighbourIds = new ArrayList<>();
-//            ns.forEach(ne -> {
-//                if(ne.getDistanceToTarget() < disToOrb){
-//                    disToOrb = ne.getDistanceToTarget();
-//                    closestNeighbour = ne.getId();
-//                }
-//            });
-            prevLocation = state.getCurrentLocation();
-            if(closestNeighbour == (long)0){
-                closestNeighbour = lastNeighbour;
-            }
-            state.moveTo(closestNeighbour);
-//            try {
-//                System.out.println("Move to: "+closestNeighbour);
-//                state.moveTo(closestNeighbour);
-//            } catch (IllegalArgumentException e){
-//                System.err.println("Caught IllegalArgumentException: " + e.getMessage());
-//            }
+            traverseNodes(state.getNeighbours(), state.getCurrentLocation(), state);
 
 
         } while (state.getDistanceToTarget() !=0);
@@ -97,6 +62,34 @@ public class Explorer {
         //ns.forEach(ne -> System.out.println(ne.getId()));
 
         //System.out.println(state.getNeighbours());
+    }
+
+    private void traverseNodes(Collection<NodeStatus> nodes, long locationId, ExplorationState state){
+
+
+//        if(nodes.size() == 1){
+//            Boolean visited = false;
+//            for(NodeStatus ne : nodes){
+//                long neighbour = ne.getId();
+//                if(visitedIds.contains(neighbour)){
+//                    return;
+//                } else {
+//                    visitedIds.add(neighbour);
+//                    state.moveTo(neighbour);
+//                }
+//            }
+//        }
+
+        for(NodeStatus ne : nodes){
+            if(visitedIds.contains(ne.getId()) == false) {
+                state.moveTo(ne.getId());
+                visitedIds.add(ne.getId());
+                Collection<NodeStatus> nn = state.getNeighbours();
+                long location = state.getCurrentLocation();
+                traverseNodes(nn, location, state);
+            }
+        }
+
     }
 
     /**
@@ -126,3 +119,4 @@ public class Explorer {
         //TODO: Escape from the cavern before time runs out
     }
 }
+
