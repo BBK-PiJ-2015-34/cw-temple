@@ -66,27 +66,30 @@ public class Explorer {
 
     private void traverseNodes(Collection<NodeStatus> nodes, long locationId, ExplorationState state){
 
+        long location = state.getCurrentLocation();
 
-//        if(nodes.size() == 1){
-//            Boolean visited = false;
-//            for(NodeStatus ne : nodes){
-//                long neighbour = ne.getId();
-//                if(visitedIds.contains(neighbour)){
-//                    return;
-//                } else {
-//                    visitedIds.add(neighbour);
-//                    state.moveTo(neighbour);
-//                }
-//            }
-//        }
+        if(nodes.size() == 1){
+            Boolean visited = false;
+            for(NodeStatus ne : nodes){
+                long neighbour = ne.getId();
+                if(visitedIds.contains(neighbour)){
+                    visitedIds.add(neighbour);
+                    state.moveTo(neighbour);
+                    return;
+                }
+            }
+
+        }
 
         for(NodeStatus ne : nodes){
-            if(visitedIds.contains(ne.getId()) == false) {
-                state.moveTo(ne.getId());
-                visitedIds.add(ne.getId());
+            long id = ne.getId();
+            if(visitedIds.contains(id) == false) {
+                state.moveTo(id);
+                visitedIds.add(id);
+
                 Collection<NodeStatus> nn = state.getNeighbours();
-                long location = state.getCurrentLocation();
-                traverseNodes(nn, location, state);
+
+                traverseNodes(nn, state.getCurrentLocation(), state);
             }
         }
 
