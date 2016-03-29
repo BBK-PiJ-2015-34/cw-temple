@@ -3,10 +3,11 @@ package student;
 import game.EscapeState;
 import game.ExplorationState;
 import game.NodeStatus;
-import game.TraversedNodeStatus;
 
-import java.util.*;
-import java.util.function.BooleanSupplier;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 public class Explorer {
 
@@ -41,7 +42,6 @@ public class Explorer {
      * @param state the information available at the current state
      */
 
-    Queue<TraversedNodeStatus> breathFirstQueue;
     Stack<Long> breadcrumbs;
     Set<Long> visitedIds;
 
@@ -69,27 +69,42 @@ public class Explorer {
         long location = state.getCurrentLocation();
 
         if(nodes.size() == 1){
-            Boolean visited = false;
+
             for(NodeStatus ne : nodes){
                 long neighbour = ne.getId();
                 if(visitedIds.contains(neighbour)){
                     visitedIds.add(neighbour);
-                    state.moveTo(neighbour);
                     return;
                 }
             }
 
         }
+        Boolean visitedAll = true;
+        for(NodeStatus ne : nodes){
+            if(visitedIds.contains(ne.getId()) == false){
+                visitedAll = false;
+            }
+        }
+        if (visitedAll == true){
+            return;
+        }
+
 
         for(NodeStatus ne : nodes){
             long id = ne.getId();
             if(visitedIds.contains(id) == false) {
+
                 state.moveTo(id);
+                if(state.getDistanceToTarget() == 0){
+                    return;
+                }
+
                 visitedIds.add(id);
 
                 Collection<NodeStatus> nn = state.getNeighbours();
 
                 traverseNodes(nn, state.getCurrentLocation(), state);
+                state.moveTo(locationId);
             }
         }
 
@@ -122,4 +137,3 @@ public class Explorer {
         //TODO: Escape from the cavern before time runs out
     }
 }
-
