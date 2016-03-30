@@ -2,6 +2,7 @@ package student;
 
 import game.EscapeState;
 import game.ExplorationState;
+import game.Node;
 import game.NodeStatus;
 
 import java.util.*;
@@ -138,6 +139,8 @@ public class Explorer {
      */
     public void escape(EscapeState state) {
         //TODO: Escape from the cavern before time runs out
+        Collection<Node> ns = state.getVertices();
+
     }
 
     static class NeighbourSort implements Comparator<NodeStatus>{
