@@ -44,6 +44,7 @@ public class Explorer {
 
     Stack<Long> breadcrumbs;
     Set<Long> visitedIds;
+    Boolean foundOrb = false;
 
     public void explore(ExplorationState state) {
         //TODO:
@@ -74,7 +75,6 @@ public class Explorer {
                 long neighbour = ne.getId();
                 if(visitedIds.contains(neighbour)){
                     visitedIds.add(neighbour);
-                    state.moveTo(neighbour);
                     return;
                 }
             }
@@ -94,12 +94,22 @@ public class Explorer {
         for(NodeStatus ne : nodes){
             long id = ne.getId();
             if(visitedIds.contains(id) == false) {
-                state.moveTo(id);
+                if (!foundOrb){
+                    state.moveTo(id);
+                }
+
+                if(state.getDistanceToTarget() == 0){
+                    foundOrb = true;
+                }
+
                 visitedIds.add(id);
 
                 Collection<NodeStatus> nn = state.getNeighbours();
 
                 traverseNodes(nn, state.getCurrentLocation(), state);
+                if (!foundOrb) {
+                    state.moveTo(locationId);
+                }
             }
         }
 
@@ -132,4 +142,3 @@ public class Explorer {
         //TODO: Escape from the cavern before time runs out
     }
 }
-
