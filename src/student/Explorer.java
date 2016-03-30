@@ -58,7 +58,7 @@ public class Explorer {
 
         System.out.println(state.getCurrentLocation());
         //ns.forEach(ne -> System.out.println(ne.getId()));
-        
+
     }
 
     private void traverseNodes(Collection<NodeStatus> nodes, long locationId, ExplorationState state){
