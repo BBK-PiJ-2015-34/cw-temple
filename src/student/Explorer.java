@@ -4,10 +4,7 @@ import game.EscapeState;
 import game.ExplorationState;
 import game.NodeStatus;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class Explorer {
 
@@ -62,7 +59,6 @@ public class Explorer {
         System.out.println(state.getCurrentLocation());
         //ns.forEach(ne -> System.out.println(ne.getId()));
 
-        //System.out.println(state.getNeighbours());
     }
 
     private void traverseNodes(Collection<NodeStatus> nodes, long locationId, ExplorationState state){
@@ -90,8 +86,10 @@ public class Explorer {
             return;
         }
 
+        List<NodeStatus> ns = new ArrayList<NodeStatus>(nodes);
+        Collections.sort(ns, new NeighbourSort());
 
-        for(NodeStatus ne : nodes){
+        for(NodeStatus ne : ns){
             long id = ne.getId();
             if(visitedIds.contains(id) == false) {
                 if (!foundOrb){
@@ -140,5 +138,11 @@ public class Explorer {
      */
     public void escape(EscapeState state) {
         //TODO: Escape from the cavern before time runs out
+    }
+
+    static class NeighbourSort implements Comparator<NodeStatus>{
+        public int compare(NodeStatus o1, NodeStatus o2) {
+            return o1.compareTo(o2);
+        }
     }
 }
