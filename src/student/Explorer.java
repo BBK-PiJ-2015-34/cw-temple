@@ -44,6 +44,7 @@ public class Explorer {
 
     Stack<Long> breadcrumbs;
     Set<Long> visitedIds;
+    Boolean foundOrb = false;
 
     public void explore(ExplorationState state) {
         //TODO:
@@ -93,10 +94,12 @@ public class Explorer {
         for(NodeStatus ne : nodes){
             long id = ne.getId();
             if(visitedIds.contains(id) == false) {
+                if (!foundOrb){
+                    state.moveTo(id);
+                }
 
-                state.moveTo(id);
                 if(state.getDistanceToTarget() == 0){
-                    return;
+                    foundOrb = true;
                 }
 
                 visitedIds.add(id);
@@ -104,7 +107,9 @@ public class Explorer {
                 Collection<NodeStatus> nn = state.getNeighbours();
 
                 traverseNodes(nn, state.getCurrentLocation(), state);
-                state.moveTo(locationId);
+                if (!foundOrb) {
+                    state.moveTo(locationId);
+                }
             }
         }
 
