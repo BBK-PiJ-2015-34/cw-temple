@@ -1,9 +1,6 @@
 package student;
 
-import game.EscapeState;
-import game.ExplorationState;
-import game.Node;
-import game.NodeStatus;
+import game.*;
 
 import java.util.*;
 
@@ -140,7 +137,40 @@ public class Explorer {
     public void escape(EscapeState state) {
         //TODO: Escape from the cavern before time runs out
         Collection<Node> ns = state.getVertices();
+        //Edge ed = state.getCurrentNode().getEdge(state.getCurrentNode());
+        Set<Node> n = state.getCurrentNode().getNeighbours();
+        for(Node no : n){
+            Edge ed = state.getCurrentNode().getEdge(no);
+            System.out.println("Edge: "+ed);
+        }
+        //Move two squares forward
+        n = state.getCurrentNode().getNeighbours();
+        for(Node no : n){
+            if(no.getTile().getColumn() == 3 && no.getTile().getRow() == 12){
+                state.moveTo(no);
+            }
 
+        }
+
+       n = state.getCurrentNode().getNeighbours();
+        for(Node no : n){
+            if(no.getTile().getColumn() == 4 && no.getTile().getRow() == 12){
+                state.moveTo(no);
+            }
+        }
+        n = state.getCurrentNode().getNeighbours();
+        for(Node no : n){
+            Edge ed = state.getCurrentNode().getEdge(no);
+            System.out.println("Edge: "+ed);
+        }
+
+
+        System.out.println(state.getCurrentNode());
+        System.out.println(state.getExit());
+        Tile t = state.getCurrentNode().getTile();
+        System.out.println("Current Tile: "+t);
+        System.out.println("Current Row: "+t.getRow());
+        System.out.println("Current Column: "+t.getColumn());
     }
 
     static class NeighbourSort implements Comparator<NodeStatus>{
