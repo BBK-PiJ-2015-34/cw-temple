@@ -44,6 +44,11 @@ public class Explorer {
     Boolean foundOrb = false;
     Boolean foundExit = false;
 
+    int[][] route = {{3,12},{4,12},{4,11},{5,11},{6,11},{6,12},{7,12},{7,13},{8,13},{9,13},{10,13},{11,13}
+            ,{11,14},{12,14},{12,15},{12,16},{12,17},{13,17}
+    };
+
+
     public void explore(ExplorationState state) {
         //TODO:
         visitedIds = new HashSet<>();
@@ -142,43 +147,39 @@ public class Explorer {
 
         nodeQueue = new LinkedList<>();
         visitedIds = new HashSet<>();
-        bfs(state);
+        //bfs(state);
         //Edge ed = state.getCurrentNode().getEdge(state.getCurrentNode());
-//        Set<Node> n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            Edge ed = state.getCurrentNode().getEdge(no);
-//            System.out.println("Edge: "+ed);
-//        }
+        Set<Node> n = state.getCurrentNode().getNeighbours();
+        DisplayEdges(n, state);
 
 
         //Move two squares forward
-//        n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            if(no.getTile().getColumn() == 3 && no.getTile().getRow() == 12){
-//                state.moveTo(no);
-//            }
-//
-//        }
-//
-//       n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            if(no.getTile().getColumn() == 4 && no.getTile().getRow() == 12){
-//                state.moveTo(no);
-//            }
-//        }
-//        n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            Edge ed = state.getCurrentNode().getEdge(no);
-//            System.out.println("Edge: "+ed);
-//        }
-//
-//
-//        System.out.println(state.getCurrentNode());
-//        System.out.println(state.getExit());
-//        Tile t = state.getCurrentNode().getTile();
-//        System.out.println("Current Tile: "+t);
-//        System.out.println("Current Row: "+t.getRow());
-//        System.out.println("Current Column: "+t.getColumn());
+        n = state.getCurrentNode().getNeighbours();
+        for(Node no : n){
+            if(no.getTile().getColumn() == 3 && no.getTile().getRow() == 12){
+                state.moveTo(no);
+                state.pickUpGold();
+            }
+        }
+        DisplayEdges(state.getCurrentNode().getNeighbours(), state);
+
+       n = state.getCurrentNode().getNeighbours();
+        for(Node no : n){
+            if(no.getTile().getColumn() == 4 && no.getTile().getRow() == 12){
+                state.moveTo(no);
+                state.pickUpGold();
+            }
+        }
+        n = state.getCurrentNode().getNeighbours();
+        DisplayEdges(state.getCurrentNode().getNeighbours(), state);
+
+
+        System.out.println(state.getCurrentNode());
+        System.out.println(state.getExit());
+        Tile t = state.getCurrentNode().getTile();
+        System.out.println("Current Tile: "+t);
+        System.out.println("Current Row: "+t.getRow());
+        System.out.println("Current Column: "+t.getColumn());
     }
 
     void bfs(EscapeState state){
@@ -207,11 +208,17 @@ public class Explorer {
 
     }
 
-    int computeDistanceToTarget(int row, int col) {
-        return Math.abs(row - state.getExit().getTile().getRow())
-                + Math.abs(col - state.getExit().getTile().getColumn());
+//    int computeDistanceToTarget(int row, int col) {
+//        return Math.abs(row - state.getExit().getTile().getRow())
+//                + Math.abs(col - state.getExit().getTile().getColumn());
+//    }
+    void DisplayEdges(Set<Node> n, EscapeState theState){
+        for(Node no : n){
+            Edge ed = theState.getCurrentNode().getEdge(no);
+            System.out.println("Edge: "+ed+" length: "+ed.length());
+        }
+        System.out.println();
     }
-
     static class NeighbourSort implements Comparator<NodeStatus>{
         public int compare(NodeStatus o1, NodeStatus o2) {
             return o1.compareTo(o2);
