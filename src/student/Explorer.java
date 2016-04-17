@@ -157,43 +157,7 @@ public class Explorer {
         exitNode = state.getExit();
         findPathToExit(state, state.getCurrentNode(), state.getCurrentNode().getNeighbours());
         traverseExitPath(state);
-        //Edge ed = state.getCurrentNode().getEdge(state.getCurrentNode());
-        //Set<Node> n = state.getCurrentNode().getNeighbours();
-        //DisplayEdges(n, state);
-        //Move to exit
-//        for (int i = 0; i < 18; i++){
-//            System.out.println("Tile Column:"+route[i][0]+" Tile Row:"+route[i][1]);
-//            DisplayEdges(state.getCurrentNode().getNeighbours(), state);
-//            for(Node no : n){
-//                if(no.getTile().getColumn() == route[i][0] && no.getTile().getRow() == route[i][1]){
-//                    state.moveTo(no);
-//
-//                }
-//            }
-//            n = state.getCurrentNode().getNeighbours();
-//        }
-//        return;
-        //Move two squares forward
-//        n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            if(no.getTile().getColumn() == 3 && no.getTile().getRow() == 12){
-//                state.moveTo(no);
-//                state.pickUpGold();
-//            }
-//        }
-//        DisplayEdges(state.getCurrentNode().getNeighbours(), state);
-//
-//       n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            if(no.getTile().getColumn() == 4 && no.getTile().getRow() == 12){
-//                state.moveTo(no);
-//                state.pickUpGold();
-//            }
-//        }
-//        n = state.getCurrentNode().getNeighbours();
-//        DisplayEdges(state.getCurrentNode().getNeighbours(), state);
-//
-//
+
         System.out.println(state.getCurrentNode());
         System.out.println(state.getExit());
         Tile t = state.getCurrentNode().getTile();
@@ -234,6 +198,10 @@ public class Explorer {
         for (Node pathNode : exitPath ){
             if(state.getCurrentNode() != pathNode) {
                 state.moveTo(pathNode);
+                if(state.getCurrentNode().getTile().getGold() > 0){
+                    state.pickUpGold();
+                }
+
                 if(state.getExit() == state.getCurrentNode()){
                     return;
                 }
@@ -279,10 +247,13 @@ public class Explorer {
                     foundExit = true;
                     System.out.println("Found path to exit!!!");
                 }
-
             }
         }
+    }
 
+    static  int computeDistanceToTarget(Node n) {
+        return Math.abs(n.getTile().getRow() - Explorer.exitNode.getTile().getRow())
+                + Math.abs(n.getTile().getColumn() - Explorer.exitNode.getTile().getColumn());
     }
 
 
@@ -302,11 +273,7 @@ public class Explorer {
 
     static class NeighbourSort2 implements Comparator<Node>{
         public int compare(Node o1, Node o2) {
-            return computeDistanceToTarget(o1) - computeDistanceToTarget(o2);
-        }
-        int computeDistanceToTarget(Node n) {
-            return Math.abs(n.getTile().getRow() - Explorer.exitNode.getTile().getRow())
-                    + Math.abs(n.getTile().getColumn() - Explorer.exitNode.getTile().getColumn());
+            return Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
         }
     }
 }
