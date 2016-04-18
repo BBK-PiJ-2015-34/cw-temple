@@ -231,7 +231,7 @@ public class Explorer {
             return;
         }
         List<Node> ns = new ArrayList<Node>(neighbours);
-        Collections.sort(ns, new NeighbourSort2());
+        Collections.sort(ns, new NeighbourSort2(0));
         Node visitedNode;
 
         for (Node ne : ns){
@@ -272,8 +272,24 @@ public class Explorer {
     }
 
     static class NeighbourSort2 implements Comparator<Node>{
+
+        int bias;
+
+        public NeighbourSort2(int bias){
+            this.bias = bias;
+        }
+
         public int compare(Node o1, Node o2) {
-            return Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
+            int sortOp = Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
+            if (bias == 0) {
+                return  sortOp;
+            } else {
+                if (sortOp == 0){
+                    sortOp = 1;
+                    return sortOp;
+                }
+            }
+            return sortOp;
         }
     }
 }
