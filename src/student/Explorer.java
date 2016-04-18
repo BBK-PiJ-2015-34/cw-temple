@@ -37,16 +37,27 @@ public class Explorer {
      * @param state the information available at the current state
      */
 
-    Stack<Long> breadcrumbs;
+
     Queue<Node> nodeQueue;
 
     Set<Long> visitedIds;
     Boolean foundOrb = false;
     Boolean foundExit = false;
 
+    List<Node> exitPath = new ArrayList<>();
+    int exitNodeColumn;
+    int exitNodeRow;
+    static Node exitNode;
+
+    int[][] route = {{3,12},{4,12},{4,11},{5,11},{6,11},{6,12},{7,12},{7,13},{8,13},{9,13},{10,13},{11,13}
+            ,{11,14},{12,14},{12,15},{12,16},{12,17},{13,17}
+    };
+
+
     public void explore(ExplorationState state) {
         //TODO:
         visitedIds = new HashSet<>();
+        visitedIds.add(state.getCurrentLocation());
         do {
             traverseNodes(state.getNeighbours(), state.getCurrentLocation(), state);
 
@@ -71,7 +82,6 @@ public class Explorer {
             for(NodeStatus ne : nodes){
                 long neighbour = ne.getId();
                 if(visitedIds.contains(neighbour)){
-                    visitedIds.add(neighbour);
                     return;
                 }
             }
@@ -142,46 +152,22 @@ public class Explorer {
 
         nodeQueue = new LinkedList<>();
         visitedIds = new HashSet<>();
-        bfs(state);
-        //Edge ed = state.getCurrentNode().getEdge(state.getCurrentNode());
-//        Set<Node> n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            Edge ed = state.getCurrentNode().getEdge(no);
-//            System.out.println("Edge: "+ed);
-//        }
+        findColumnRowofExit(state);
+        visitedIds = new HashSet<>();
+        exitNode = state.getExit();
+        findPathToExit(state, state.getCurrentNode(), state.getCurrentNode().getNeighbours());
+        traverseExitPath(state);
 
-
-        //Move two squares forward
-//        n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            if(no.getTile().getColumn() == 3 && no.getTile().getRow() == 12){
-//                state.moveTo(no);
-//            }
-//
-//        }
-//
-//       n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            if(no.getTile().getColumn() == 4 && no.getTile().getRow() == 12){
-//                state.moveTo(no);
-//            }
-//        }
-//        n = state.getCurrentNode().getNeighbours();
-//        for(Node no : n){
-//            Edge ed = state.getCurrentNode().getEdge(no);
-//            System.out.println("Edge: "+ed);
-//        }
-//
-//
-//        System.out.println(state.getCurrentNode());
-//        System.out.println(state.getExit());
-//        Tile t = state.getCurrentNode().getTile();
-//        System.out.println("Current Tile: "+t);
-//        System.out.println("Current Row: "+t.getRow());
-//        System.out.println("Current Column: "+t.getColumn());
+        System.out.println(state.getCurrentNode());
+        System.out.println(state.getExit());
+        Tile t = state.getCurrentNode().getTile();
+        System.out.println("Current Tile: "+t);
+        System.out.println("Current Row: "+t.getRow());
+        System.out.println("Current Column: "+t.getColumn());
     }
 
-    void bfs(EscapeState state){
+    private void findColumnRowofExit(EscapeState state){
+        System.out.println("Looking for exit node!");
         //Collection<Node> nodes = state.getVertices();
         //List<Node> ns = new ArrayList<>(nodes);
         Node startNode = state.getCurrentNode();
@@ -190,10 +176,11 @@ public class Explorer {
         Node currentNode;
         while(nodeQueue.isEmpty() != true) {
             currentNode = nodeQueue.remove();
+            visitedIds.add(currentNode.getId());
             if(currentNode == state.getExit()){
-                int row = currentNode.getTile().getRow();
-                int column = currentNode.getTile().getColumn();
-                System.out.println("Found exit at: Row: " + row + " Column: " + column );
+                exitNodeRow = currentNode.getTile().getRow();
+                exitNodeColumn = currentNode.getTile().getColumn();
+                System.out.println("Found exit at: Row: " + exitNodeRow + " Column: " + exitNodeColumn );
                 break;
             }
             Set<Node> currentNeighbours = currentNode.getNeighbours();
@@ -207,14 +194,86 @@ public class Explorer {
 
     }
 
-    int computeDistanceToTarget(int row, int col) {
-        return Math.abs(row - state.getExit().getTile().getRow())
-                + Math.abs(col - state.getExit().getTile().getColumn());
+    private void traverseExitPath(EscapeState state){
+        for (Node pathNode : exitPath ){
+            if(state.getCurrentNode() != pathNode) {
+                state.moveTo(pathNode);
+                if(state.getCurrentNode().getTile().getGold() > 0){
+                    state.pickUpGold();
+                }
+
+                if(state.getExit() == state.getCurrentNode()){
+                    return;
+                }
+            }
+        }
     }
 
+    private void findPathToExit(EscapeState state, Node currentNode, Set<Node> neighbours){
+
+        exitPath.add(currentNode);
+
+        if (neighbours.size() == 1){
+            for(Node ne: neighbours){
+                if(visitedIds.contains(ne.getId())){
+                    return;
+                }
+            }
+        }
+
+        Boolean visitedAll = true;
+        for(Node ne : neighbours){
+            if(visitedIds.contains(ne.getId()) == false){
+                visitedAll = false;
+            }
+        }
+        if (visitedAll == true){
+            return;
+        }
+        List<Node> ns = new ArrayList<Node>(neighbours);
+        Collections.sort(ns, new NeighbourSort2());
+        Node visitedNode;
+
+        for (Node ne : ns){
+            long id = ne.getId();
+            if(visitedIds.contains(id) == false){
+                if(!foundExit){
+                    visitedNode = ne;
+                    visitedIds.add(visitedNode.getId());
+                    findPathToExit(state, visitedNode, visitedNode.getNeighbours());
+                    exitPath.add(currentNode);
+                }
+                if(ne == state.getExit()){
+                    foundExit = true;
+                    System.out.println("Found path to exit!!!");
+                }
+            }
+        }
+    }
+
+    static  int computeDistanceToTarget(Node n) {
+        return Math.abs(n.getTile().getRow() - Explorer.exitNode.getTile().getRow())
+                + Math.abs(n.getTile().getColumn() - Explorer.exitNode.getTile().getColumn());
+    }
+
+
+
+    void DisplayEdges(Set<Node> n, EscapeState theState){
+        for(Node no : n){
+            Edge ed = theState.getCurrentNode().getEdge(no);
+            System.out.println("Edge: "+ed+" length: "+ed.length());
+        }
+        System.out.println();
+    }
     static class NeighbourSort implements Comparator<NodeStatus>{
         public int compare(NodeStatus o1, NodeStatus o2) {
             return o1.compareTo(o2);
+        }
+    }
+
+    static class NeighbourSort2 implements Comparator<Node>{
+        public int compare(Node o1, Node o2) {
+            return Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
         }
     }
 }
