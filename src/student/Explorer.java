@@ -49,10 +49,6 @@ public class Explorer {
     int exitNodeRow;
     static Node exitNode;
 
-    int[][] route = {{3,12},{4,12},{4,11},{5,11},{6,11},{6,12},{7,12},{7,13},{8,13},{9,13},{10,13},{11,13}
-            ,{11,14},{12,14},{12,15},{12,16},{12,17},{13,17}
-    };
-
 
     public void explore(ExplorationState state) {
         //TODO:
@@ -64,14 +60,13 @@ public class Explorer {
 
         } while (state.getDistanceToTarget() !=0);
 
-        System.out.println(state.getCurrentLocation());
-
-
-
-        System.out.println(state.getCurrentLocation());
-        //ns.forEach(ne -> System.out.println(ne.getId()));
-
     }
+
+
+    /**
+     * This method that is called recursively finds the orb.
+     * It gets to the orb using a depth first search
+     */
 
     private void traverseNodes(Collection<NodeStatus> nodes, long locationId, ExplorationState state){
 
@@ -152,48 +147,18 @@ public class Explorer {
 
         nodeQueue = new LinkedList<>();
         visitedIds = new HashSet<>();
-        findColumnRowofExit(state);
         visitedIds = new HashSet<>();
         exitNode = state.getExit();
+        exitNodeRow = state.getExit().getTile().getRow();
+        exitNodeColumn = state.getExit().getTile().getColumn();
         findPathToExit(state, state.getCurrentNode(), state.getCurrentNode().getNeighbours());
         traverseExitPath(state);
-
-        System.out.println(state.getCurrentNode());
-        System.out.println(state.getExit());
-        Tile t = state.getCurrentNode().getTile();
-        System.out.println("Current Tile: "+t);
-        System.out.println("Current Row: "+t.getRow());
-        System.out.println("Current Column: "+t.getColumn());
     }
 
-    private void findColumnRowofExit(EscapeState state){
-        System.out.println("Looking for exit node!");
-        //Collection<Node> nodes = state.getVertices();
-        //List<Node> ns = new ArrayList<>(nodes);
-        Node startNode = state.getCurrentNode();
-        nodeQueue.add(startNode);
-        visitedIds.add(startNode.getId());
-        Node currentNode;
-        while(nodeQueue.isEmpty() != true) {
-            currentNode = nodeQueue.remove();
-            visitedIds.add(currentNode.getId());
-            if(currentNode == state.getExit()){
-                exitNodeRow = currentNode.getTile().getRow();
-                exitNodeColumn = currentNode.getTile().getColumn();
-                System.out.println("Found exit at: Row: " + exitNodeRow + " Column: " + exitNodeColumn );
-                break;
-            }
-            Set<Node> currentNeighbours = currentNode.getNeighbours();
-            for (Node ne : currentNeighbours) {
-                if(visitedIds.contains(ne.getId()) == false) {
-                    nodeQueue.add(ne);
-                }
-            }
 
-        }
-
-    }
-
+    /**
+     * Traverses the path to the exit
+     */
     private void traverseExitPath(EscapeState state){
         for (Node pathNode : exitPath ){
             if(state.getCurrentNode() != pathNode) {
@@ -209,6 +174,10 @@ public class Explorer {
         }
     }
 
+
+    /**
+     * Finds a path to the exit
+     */
     private void findPathToExit(EscapeState state, Node currentNode, Set<Node> neighbours){
 
         exitPath.add(currentNode);
@@ -231,7 +200,7 @@ public class Explorer {
             return;
         }
         List<Node> ns = new ArrayList<Node>(neighbours);
-        Collections.sort(ns, new NeighbourSort2(0));
+        Collections.sort(ns, new NeighbourSort2());
         Node visitedNode;
 
         for (Node ne : ns){
@@ -257,14 +226,6 @@ public class Explorer {
     }
 
 
-
-    void DisplayEdges(Set<Node> n, EscapeState theState){
-        for(Node no : n){
-            Edge ed = theState.getCurrentNode().getEdge(no);
-            System.out.println("Edge: "+ed+" length: "+ed.length());
-        }
-        System.out.println();
-    }
     static class NeighbourSort implements Comparator<NodeStatus>{
         public int compare(NodeStatus o1, NodeStatus o2) {
             return o1.compareTo(o2);
@@ -273,23 +234,10 @@ public class Explorer {
 
     static class NeighbourSort2 implements Comparator<Node>{
 
-        int bias;
-
-        public NeighbourSort2(int bias){
-            this.bias = bias;
-        }
 
         public int compare(Node o1, Node o2) {
-            int sortOp = Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
-            if (bias == 0) {
-                return  sortOp;
-            } else {
-                if (sortOp == 0){
-                    sortOp = 1;
-                    return sortOp;
-                }
-            }
-            return sortOp;
+            return Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
+
         }
     }
 }
