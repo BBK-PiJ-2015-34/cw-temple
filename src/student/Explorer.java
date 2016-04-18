@@ -1,8 +1,6 @@
 package student;
 
-import game.EscapeState;
-import game.ExplorationState;
-import game.NodeStatus;
+import game.*;
 
 import java.util.*;
 
@@ -39,27 +37,38 @@ public class Explorer {
      * @param state the information available at the current state
      */
 
-    Stack<Long> breadcrumbs;
+
+    Queue<Node> nodeQueue;
+
     Set<Long> visitedIds;
     Boolean foundOrb = false;
+    Boolean foundExit = false;
+
+    List<Node> exitPath = new ArrayList<>();
+    int exitNodeColumn;
+    int exitNodeRow;
+    static Node exitNode;
+
 
     public void explore(ExplorationState state) {
         //TODO:
         visitedIds = new HashSet<>();
+        visitedIds.add(state.getCurrentLocation());
         do {
             traverseNodes(state.getNeighbours(), state.getCurrentLocation(), state);
 
 
         } while (state.getDistanceToTarget() !=0);
 
-        System.out.println(state.getCurrentLocation());
-
-
-
-        System.out.println(state.getCurrentLocation());
-        //ns.forEach(ne -> System.out.println(ne.getId()));
-
     }
+
+
+
+    /**
+     * This method that is called recursively finds the orb.
+     * It gets to the orb using a depth first search
+     */
+
 
     private void traverseNodes(Collection<NodeStatus> nodes, long locationId, ExplorationState state){
 
@@ -70,7 +79,6 @@ public class Explorer {
             for(NodeStatus ne : nodes){
                 long neighbour = ne.getId();
                 if(visitedIds.contains(neighbour)){
-                    visitedIds.add(neighbour);
                     return;
                 }
             }
@@ -138,11 +146,100 @@ public class Explorer {
      */
     public void escape(EscapeState state) {
         //TODO: Escape from the cavern before time runs out
+
+        nodeQueue = new LinkedList<>();
+        visitedIds = new HashSet<>();
+        visitedIds = new HashSet<>();
+        exitNode = state.getExit();
+        exitNodeRow = state.getExit().getTile().getRow();
+        exitNodeColumn = state.getExit().getTile().getColumn();
+        findPathToExit(state, state.getCurrentNode(), state.getCurrentNode().getNeighbours());
+        traverseExitPath(state);
     }
+
+
+    /**
+     * Traverses the path to the exit
+     */
+    private void traverseExitPath(EscapeState state){
+        for (Node pathNode : exitPath ){
+            if(state.getCurrentNode() != pathNode) {
+                state.moveTo(pathNode);
+                if(state.getCurrentNode().getTile().getGold() > 0){
+                    state.pickUpGold();
+                }
+
+                if(state.getExit() == state.getCurrentNode()){
+                    return;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Finds a path to the exit
+     */
+    private void findPathToExit(EscapeState state, Node currentNode, Set<Node> neighbours){
+
+        exitPath.add(currentNode);
+
+        if (neighbours.size() == 1){
+            for(Node ne: neighbours){
+                if(visitedIds.contains(ne.getId())){
+                    return;
+                }
+            }
+        }
+
+        Boolean visitedAll = true;
+        for(Node ne : neighbours){
+            if(visitedIds.contains(ne.getId()) == false){
+                visitedAll = false;
+            }
+        }
+        if (visitedAll == true){
+            return;
+        }
+        List<Node> ns = new ArrayList<Node>(neighbours);
+        Collections.sort(ns, new NeighbourSort2());
+        Node visitedNode;
+
+        for (Node ne : ns){
+            long id = ne.getId();
+            if(visitedIds.contains(id) == false){
+                if(!foundExit){
+                    visitedNode = ne;
+                    visitedIds.add(visitedNode.getId());
+                    findPathToExit(state, visitedNode, visitedNode.getNeighbours());
+                    exitPath.add(currentNode);
+                }
+                if(ne == state.getExit()){
+                    foundExit = true;
+                    System.out.println("Found path to exit!!!");
+                }
+            }
+        }
+    }
+
+    static  int computeDistanceToTarget(Node n) {
+        return Math.abs(n.getTile().getRow() - Explorer.exitNode.getTile().getRow())
+                + Math.abs(n.getTile().getColumn() - Explorer.exitNode.getTile().getColumn());
+    }
+
 
     static class NeighbourSort implements Comparator<NodeStatus>{
         public int compare(NodeStatus o1, NodeStatus o2) {
-                return o1.compareTo(o2);
+            return o1.compareTo(o2);
         }
     }
+
+    static class NeighbourSort2 implements Comparator<Node>{
+
+        public int compare(Node o1, Node o2) {
+            return Explorer.computeDistanceToTarget(o1) - Explorer.computeDistanceToTarget(o2);
+
+        }
+    }
+
 }
